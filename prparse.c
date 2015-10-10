@@ -220,7 +220,7 @@ return(ret);
 			copy_varnames()
 Keep a copy of the names of the variables for an answer to a query.
  *******************************************************************/
-copy_varnames()
+void copy_varnames()
 {
 int i;
 char *get_string();

@@ -42,7 +42,7 @@ prompt_user()
  Used when answering yes to a query.
  *******************************************************************/
 
-pr_solution(nvar, substptr)
+void pr_solution(nvar, substptr)
 varindx nvar;
 subst_ptr_t substptr;
 {
@@ -118,7 +118,7 @@ The object exists only in a virtual way, dereferencing is the way
 of getting at the values of those variables.
  *******************************************************************/
 
-out_node(nodeptr, substptr)
+int out_node(nodeptr, substptr)
 node_ptr_t nodeptr; /* this is the object to print */
 subst_ptr_t substptr;/* this gives you the variable values */
 {
@@ -171,6 +171,7 @@ subst_ptr_t substptr;/* this gives you the variable values */
 	default:
 		INTERNAL_ERROR("unknown type");
 	}
+    return  0;
 }
 
 /*******************************************************************

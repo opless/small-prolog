@@ -260,7 +260,7 @@ extern char *Curr_string_input;
  Called by main().
  This is the interactive question-answer loop driver.
  *******************************************************************/
-query_loop()
+void query_loop()
 {
 	int first_time = TRUE;/* have not backtracked yet */
 	int stop_state;

@@ -73,7 +73,7 @@ start_watch_zone = (char *)hash_search("eq");/* last predicate in sprolog.ini */
 end_watch_zone = (char *)hash_search("log-session");/* last predicate in sprolog.ini */
 assert(start_watch_zone != NULL);
 assert(end_watch_zone != NULL);
-assert(start_watch_zone != end_watch_zone)
+assert(start_watch_zone != end_watch_zone);
 for(result = 0L , p = start_watch_zone; p <= end_watch_zone;  p++)
 	result += *p;
 return(result);

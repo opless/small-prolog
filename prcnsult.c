@@ -75,7 +75,7 @@ int status;
 	Inp_linecount = 0;
 
 	if (first == 1) {
-		pr_string(_getcwd(buffer, 4095));
+		//pr_string( getcwd((char *)buffer, 4095));
 		pr_string("\n");
 		first = 0;
 	}

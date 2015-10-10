@@ -12,6 +12,9 @@
 #include <stdio.h>
 #include <ctype.h>
 #include <assert.h>
+
+#include <time.h>
+
 #include "prtypes.h"
 #include "prbltin.h"
 #include "prlush.h"
@@ -1503,7 +1506,7 @@ Counts microseconds elapsed since first call of clock.
  ************************************************************************/
 Pclock()
 {
-        long clock();
+        //long clock();
         return(bind_int(1, (integer)clock()));
 }
 #endif

@@ -15,6 +15,8 @@
 extern FILE *Log_file, *Curr_outfile;
 extern void exit_term();
 
+void errmsg(char *s);
+
 /**************************** os_alloc() *********************************/
 /* This is the function you use to get memory  from the system.		 */
 /* Why not use malloc? Because malloc will only allocate up to 64K  on   */
@@ -24,7 +26,7 @@ extern void exit_term();
 char *os_alloc(how_much)
 zone_size_t how_much;
 {
-	char *ret, *malloc();
+    char *ret; //, *malloc();
 #ifdef DEBUG
 printf("trying to allocate %u\n",how_much);
 #endif
@@ -66,8 +68,7 @@ void exit_term()
  On some systems you might want to output a box-surrounded message.
  ******************************************************************************/
 
-errmsg(s)
-char *s;
+void errmsg(char *s)
 {
 #if LOGGING_CAPABILITY
 	if(Log_file){
@@ -101,11 +102,12 @@ return(c);
 /* raw read one char , with echo */
 int tty_getche()
 {
-#ifdef MARK_WILLIAMS
-return getcnb(); /* may not be on your machine */
-#else
-return getche(); /* may not be on your machine */
-#endif
+//#ifdef MARK_WILLIAMS
+//return getcnb(); /* may not be on your machine */
+//#else
+//return getche(); /* may not be on your machine */
+//#endif
+  return getchar();
 }
 
 /************************** tty_pr_string() *********************************
@@ -282,11 +284,11 @@ long clock()
 return (100* clock()) /CLK_TCK;
 }
 #else
-long  clock()
-{
-errmsg(" Clock not implemented  on  PC");
+//long  clock()
+//{
+//errmsg(" Clock not implemented  on  PC");
 /* some recent C User Journal article has a version, I think. */
-return(0L);
-}
+//return(0L);
+//}
 #endif
 /* end of file */

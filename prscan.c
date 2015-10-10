@@ -197,7 +197,7 @@ Put just one char back on input stream.
 Cannot be used without a prior call to getachar().
 *******************************************************************/
 
-ungetachar()
+void ungetachar()
 {
 #if STRING_READ_CAPABILITY
 	if(String_input_flag)

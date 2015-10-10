@@ -297,7 +297,7 @@ int status;
 {
 #ifdef DEBUG
 char buff[80];
-sprintf(buff, "my_alloc allocating %d of type %d\n",
+//sprintf(buff, "my_alloc allocating %d of type %d\n",
 #endif
 	switch(status)
 	{

@@ -221,7 +221,7 @@ subst_ptr_t subst1ptr, subst2ptr;
 			reset_trail()
 Use the trail to reset the substitution stack.
  ******************************************************************************/
-reset_trail(from)
+void reset_trail(from)
 node_ptr_t **from;
 {
 	register node_ptr_t **tp;

@@ -25,6 +25,8 @@ CHAR Ch = '\0';
 static void scan_identifier(), scan_string();
 static int scan_number();
 
+CHAR lookahead();
+
 
 #ifdef CHARACTER
 CHAR Char_scanned;
@@ -88,11 +90,11 @@ static void ini_scan()
 get non commented character
 get next char out of comments and not in string
 *****************************************************************/
-get_nc_char()
+CHAR get_nc_char()
 {
 	CHAR c;
-	static prevc = ' ';
-	static inside_comment=0;
+	static CHAR prevc = ' ';
+	static int inside_comment=0;
 
 	for(;;){
 		c =  getc(Curr_infile);

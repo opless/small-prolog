@@ -1,4 +1,6 @@
 /* prolog.h */
+#pragma once
+
 /* environment specific headers */
 
 /* #define STATISTICS *//* just to check consumption */
@@ -9,23 +11,6 @@
 #define CLOCK 1 /* the clock predicate works */
 #define MAXOPEN 15 /* maximum number of files simultaneously open (see prbltin.c) in a mode */
 
-/* adjust this to your environment */
-#ifdef ATARI
-typedef unsigned long zone_size_t;
-#endif
-
-#ifdef MSDOS 
-typedef unsigned int zone_size_t;
-#define SEGMENTED_ARCHITECTURE /* can't compare pointers from different 
-				  arrays */
-#endif
-#ifdef SUN
-typedef unsigned int zone_size_t;
-#endif
-
-#ifdef GCC
-typedef unsigned int zone_size_t;
-#endif
 #define MAX_LINES 25 /* default number of lines per page */
 
 /**********************************************************************

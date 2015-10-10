@@ -14,8 +14,7 @@ extern atom_ptr_t Predicate; /* from prlush.c */
  A bit crude.
  Parse error messages.
  ****************************************************************************/
-char * parserr(s)
-char *s;
+char * parserr(char *s)
 {
 	extern char *Read_buffer;
 	extern FILE * Curr_infile;
@@ -37,8 +36,7 @@ char *s;
  Deadly error().
  Make sure  that the user has time to see this!
  ************************************************************************/
-void fatal(s)
-char *s;
+void fatal( char *s)
 {
 	sprintf(Print_buffer, "Fatal error %s\n", s);
 	errmsg(Print_buffer);
@@ -53,8 +51,7 @@ char *s;
  Deadly error().
  Make sure  that the user has time to see this!
  ************************************************************************/
-void fatal2(s,  s2)
-char *s, *s2;
+void fatal2( char *s,char *s2)
 {
 	sprintf(Print_buffer, "Fatal error %s %s\n", s, s2);
 	errmsg(Print_buffer);
@@ -69,9 +66,7 @@ char *s, *s2;
 If this gets called then you (or I) blew it in the C code.
 This is called by the macro INTERNAL_ERROR. 
  ************************************************************************/
-void internal_error(filename, linenumber, s)
-char *filename, *s;
-int linenumber;
+void internal_error(char *filename, int linenumber, char *s)
 {
 	sprintf(Print_buffer, "Internal Error in source file %s line %d %s\n", 
 	    filename, linenumber, s);
@@ -84,9 +79,7 @@ int linenumber;
  			argerr()
  Called by builtins.
  ************************************************************************/
-void argerr(narg, msg)
-int narg;
-char *msg;
+void argerr(int narg, char *msg)
 {
 sprintf(Print_buffer, "argument %d of %s bad should be %s\n", narg, ATOMPTR_NAME(Predicate), msg);
 errmsg(msg);
@@ -96,8 +89,7 @@ errmsg(msg);
 			nargerr()
  Used by builtins.
  ************************************************************************/
-nargerr(narg)
-int narg;
+int nargerr(int narg)
 {
 sprintf(Print_buffer, "Argument %d of %s expected; is missing\n",  narg,  ATOMPTR_NAME(Predicate));
 errmsg(Print_buffer);
@@ -123,8 +115,7 @@ char *Typenames[] =
 
 /* display a message saying the user has made a type error */
 
-int typerr(narg, type)
-objtype_t type;
+int typerr(int narg, objtype_t type)
 {
 if(type < 0 || type > 5)
   INTERNAL_ERROR("illegal type");

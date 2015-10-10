@@ -1,13 +1,23 @@
-HEADERS = prbltin.h prlex.h prlush.h prolog.h prtypes.h
-OBJECTS = pralloc.o prassert.o prbltin.o prcnsult.o prdebug.o prerror.o prhash.o pribmpc.o prlush.o prmain.o prparse.o prprint.o prscan.o prunify.o
+TARGET  = sprolog
+LIBS = 
+#CC = gcc
+CFLAGS = 
 
-default: sprolog
+.PHONY: default all clean
+
+OBJECTS = $(patsubst %.c, %.o, $(wildcard *.c))
+HEADERS = $(wildcard *.h)
+
+default: $(TARGET)
+all: default
 
 %.o: %.c $(HEADERS)
-	gcc -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
-sprolog: $(OBJECTS)
-	gcc $(OBJECTS) -o $@
+.PRECIOUS: $(TARGET) $(OBJECTS)
+
+$(TARGET): $(OBJECTS)
+	$(CC) $(OBJECTS) -Wall $(LIBS) -o $@
 
 clean:
 	-rm -f $(OBJECTS)

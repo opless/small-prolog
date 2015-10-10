@@ -27,6 +27,7 @@
  * so the variable's offset can be used to get it directly.
  */
 #include <stdio.h>
+#include <string.h>
 #define NDEBUG 1 /* turn off checking */
 #include <assert.h>
 
@@ -37,6 +38,7 @@
  */
 
 #include "prtypes.h"
+#include "prunify.h"
 
 extern int Trace_flag;
 
@@ -52,9 +54,9 @@ subst_ptr_t DerefSubst;
 /* this would be probably faster if written in a non recursive way, and with
  * in-line coding
  */
-unify(node1ptr, subst1ptr, node2ptr, subst2ptr)
-node_ptr_t node1ptr, node2ptr; /* skeletons */
-subst_ptr_t subst1ptr, subst2ptr; /* environments */
+int unify(node_ptr_t node1ptr, subst_ptr_t subst1ptr,node_ptr_t  node2ptr, subst_ptr_t subst2ptr)
+//node_ptr_t node1ptr, node2ptr; /* skeletons */
+//subst_ptr_t subst1ptr, subst2ptr; /* environments */
 {
 	objtype_t type1, type2;
 
@@ -159,11 +161,11 @@ NODE2_NONVAR:
 	case CLAUSE:
 		if(type1 != type2)return(FALSE);
 		else/* compare pointers only ! */
-		return(NODEPTR_CLAUSE(node2ptr) == NODEPTR_CLAUSE(node1ptr));
+		return (NODEPTR_CLAUSE(node2ptr) == NODEPTR_CLAUSE(node1ptr));
 #ifdef REAL
 	case REAL:
 		if(type1 != type2)return(FALSE);
-		return(NODEPTR_REAL(node1ptr) == NODEPTR_REAL(node2ptr));
+		return (NODEPTR_REAL(node1ptr) == NODEPTR_REAL(node2ptr));
 #endif	
 
 #ifdef CHARACTER	
@@ -184,9 +186,7 @@ NODE2_NONVAR:
  Set the "value" of node1ptr, subst1ptr to node2ptr, subst2ptr.
  node1ptr must be an unbound var in its environement subst1ptr.
  ******************************************************************************/
-bind_var(node1ptr, subst1ptr, node2ptr, subst2ptr)
-node_ptr_t node1ptr, node2ptr;
-subst_ptr_t subst1ptr, subst2ptr;
+int bind_var(node_ptr_t node1ptr,subst_ptr_t subst1ptr,node_ptr_t node2ptr,subst_ptr_t subst2ptr)
 {
 	char *molec; /* yes, a char * (for efficiency) */
 	node_ptr_t **my_Trail_alloc(), **trailptr;
@@ -221,8 +221,7 @@ subst_ptr_t subst1ptr, subst2ptr;
 			reset_trail()
 Use the trail to reset the substitution stack.
  ******************************************************************************/
-void reset_trail(from)
-node_ptr_t **from;
+void reset_trail(node_ptr_t **from)
 {
 	register node_ptr_t **tp;
 	extern node_ptr_t **Trail_ptr;
@@ -246,9 +245,7 @@ Returns 0 if nodeptr dereferences to (in fact instantiates to) VAR
 and 1 otherwise, ie returns 0 if (nodepr,substptr) is free
  *****************************************************************************/
 /* updates DerefNode, DerefSubst */
-dereference(nodeptr, substptr)
-node_ptr_t nodeptr;
-subst_ptr_t substptr;
+int dereference(node_ptr_t nodeptr,subst_ptr_t substptr)
 {
 	char *molec;/* a bit of finesse is needed here to gain speed */
 	node_ptr_t skelptr;
@@ -273,9 +270,7 @@ subst_ptr_t substptr;
 			occur_check()
  ******************************************************************************/
 #ifdef OCCUR_CHECK
-occur_check(node1ptr, subst1ptr, node2ptr, subst2ptr)
-node_ptr_t node1ptr, node2ptr;
-subst_ptr_t subst1ptr, subst2ptr;
+int occur_check(node_ptr_t node1ptr,subst_ptr_t subst1ptr,node_ptr_t node2ptr,subst_ptr_t subst2ptr)
 {
 
 	if(NODEPTR_TYPE(node2ptr) == VAR)

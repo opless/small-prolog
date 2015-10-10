@@ -6,6 +6,7 @@
 
 #include <stdio.h>
 #include "prtypes.h"
+#include "prmachine.h"
 
 #define NDEBUG 1 /* turn off checking */
 #define PAIRS_TOGETHER 1 

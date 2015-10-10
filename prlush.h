@@ -1,3 +1,5 @@
+#pragma once
+
 /* prlush.h */
 /* used by prlush.c */
 /* 12/21/91 

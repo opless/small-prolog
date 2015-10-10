@@ -57,9 +57,7 @@ void init_prolog()/* call this once in your application */
 	ini_globals();  /* in pralloc.c 		*/
 }
 
-main(argc,argv)
-int argc;
-char *argv[];
+int main(int argc,char *argv[])
 {
 	int i;
 	init_prolog();

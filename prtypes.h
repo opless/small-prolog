@@ -1,3 +1,4 @@
+#pragma once
 /* prtypes.h */
 /* The basic data structures of Small Prolog.
  * This is the file that you need to understand before the others
@@ -300,6 +301,8 @@ extern void fatal(), fatal2();
 #endif
 #define IS_TEMPORARY_CLAUSE(X) ((CLAUSEPTR_FLAGS(X)  & 0x1) != 0)
 
+#include "prerror.h"
+
 /* this is like the usual assert macro */
 #ifndef MEGAMAX
 #define INTERNAL_ERROR(s)  internal_error(__FILE__,__LINE__,s)
@@ -316,4 +319,5 @@ extern void fatal(), fatal2();
 #else
 #define MY_ASSERT(X)
 #endif
+
  

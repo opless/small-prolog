@@ -8,6 +8,8 @@
 #include <ctype.h>
 #include "prtypes.h"
 #include "prlex.h"
+#include "prprint.h"
+#include "prmachine.h"
 
 #ifndef NDEBUG
 #define CHK(X) if(!check_object(X))INTERNAL_ERROR("wild pointer");
@@ -179,9 +181,7 @@ subst_ptr_t substptr;/* this gives you the variable values */
  Print a list.
  *******************************************************************/
 
-out_pair(listnode, substptr)
-node_ptr_t listnode;
-subst_ptr_t substptr;
+int out_pair( node_ptr_t listnode, subst_ptr_t substptr)
 {
 	int len;
 	len = pr_string("(");
@@ -189,9 +189,7 @@ subst_ptr_t substptr;
 	return(len);
 }
 
-out1_pair(nodeptr, substptr)
-node_ptr_t nodeptr;
-subst_ptr_t substptr;
+int out1_pair(node_ptr_t nodeptr,subst_ptr_t substptr)
 {
 	node_ptr_t tailptr;
 	int len;
@@ -227,9 +225,7 @@ return(len);
  			tty_out_node();
 Output to the screen, independently of Curr_outfile.
  ******************************************************************************/
-tty_out_node(nodeptr, substptr)
-node_ptr_t nodeptr;
-subst_ptr_t substptr;
+int tty_out_node(node_ptr_t nodeptr,subst_ptr_t substptr)
 {
 FILE *save_ofp;
 int len;
@@ -248,8 +244,7 @@ Print the uninstantiated version of a node.
 This is here for source-level debugging.
  *******************************************************************/
 
-pr_node(nodeptr)
-node_ptr_t nodeptr;
+int pr_node(node_ptr_t nodeptr)
 {
 	atom_ptr_t atomptr;
 	varindx offset;
@@ -264,7 +259,7 @@ node_ptr_t nodeptr;
 
 	case VAR:
 		offset = NODEPTR_OFFSET(nodeptr);
-		sprintf(Print_buffer, "_%d", offset/sizeof(struct subst));
+		sprintf(Print_buffer, "_%lu", offset/sizeof(struct subst));
 		return(pr_string(Print_buffer));
 
 	case STRING:
@@ -304,8 +299,7 @@ node_ptr_t nodeptr;
 			pr_pair()
  *******************************************************************/
 
-pr_pair(pairptr)
-pair_ptr_t pairptr;
+pr_pair(pair_ptr_t pairptr)
 {
 	int len;
 
@@ -319,8 +313,7 @@ pair_ptr_t pairptr;
  used by pr_pair only.
  *******************************************************************/
 
-pr1_pair(pairptr)
-pair_ptr_t pairptr;
+int pr1_pair(pair_ptr_t pairptr)
 {
 	node_ptr_t tailptr;
 	objtype_t tailtype;
@@ -357,8 +350,7 @@ return(len);
  You might modify this to make it pretty-print
  *******************************************************************/
 
-pr_clause(clauseptr)
-clause_ptr_t clauseptr;
+int pr_clause(clause_ptr_t clauseptr)
 {
 	int len;
 
@@ -382,8 +374,8 @@ return(len);
 			pr_packet()
 Print all clauses pertaining to a predicate.
  *******************************************************************/
-pr_packet(clauseptr)
-clause_ptr_t clauseptr;/* Usually the first clause of the predicate */
+int pr_packet(clause_ptr_t clauseptr)
+/* Usually the first clause of the predicate */
 {
 	int len = 0;
 
@@ -405,10 +397,10 @@ virtual way, as expected in a structure sharing implementation.
  Returns the sum total of the function values as the function descends the
  list.
  ******************************************************************************/
-maplist(listnode, substptr , fn)
-node_ptr_t listnode;
-subst_ptr_t substptr; /* environment of the list */
-intfun fn;	    /* the function to apply   */
+int maplist(node_ptr_t listnode,subst_ptr_t substptr ,intfun fn)
+//node_ptr_t listnode;
+//subst_ptr_t substptr; /* environment of the list */
+//intfun fn;	    /* the function to apply   */
 {
 int value, total = 0;
 
@@ -428,6 +420,7 @@ int value, total = 0;
 		substptr = DerefSubst;
 
 	}
+    return 0; // never gets here, hopefully.
 }
 
 /* end of file */

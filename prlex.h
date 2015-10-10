@@ -1,3 +1,5 @@
+#pragma once
+
 /* prlex.h */
 #define STRING_QUOTE '"'
 #define CONS '|'

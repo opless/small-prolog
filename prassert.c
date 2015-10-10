@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include "prtypes.h"
 #include "prlex.h"
+#include "prunify.h"
+#include "prmachine.h"
 
 #define BADCOPYTYPE "Illegal data type in assert"
 #define NOTALIST "You did not give me a list"

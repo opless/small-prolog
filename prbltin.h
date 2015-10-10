@@ -1,4 +1,5 @@
 /* prbuiltin.h */
+#pragma once
 
 extern node_ptr_t Arguments;
 extern subst_ptr_t SubstGoal;

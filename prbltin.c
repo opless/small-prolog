@@ -14,10 +14,19 @@
 #include <assert.h>
 
 #include <time.h>
+#include <string.h>
 
 #include "prtypes.h"
 #include "prbltin.h"
 #include "prlush.h"
+#include "prunify.h"
+#include "prcnsult.h"
+#include "prmachine.h"
+#include "prassert.h"
+#include "pralloc.h"
+#include "prerror.h"
+#include "prprint.h"
+#include "prlex.h"
 
 #define ATOMORSTRING 	"atom or string"
 #define CANTOPEN 	"can't open %s"
@@ -42,13 +51,13 @@ int Tracing_now;
  */
 atom_ptr_t LastBuiltin;
 
+CHAR getachar(); // prscan.c
+void ini_parse(); // prscan.c
 /****************************************************************************
                 make_builtin()
  This associates a name used at the interpreter level with a builtin.
  ****************************************************************************/
-void make_builtin(fun, prolog_name)
-intfun fun;
-char *prolog_name;
+void make_builtin(intfun fun,char *prolog_name)
 {
         atom_ptr_t atomptr, intern();
 
@@ -66,7 +75,7 @@ char *prolog_name;
  The return value is equal to DerefNode
  Obviously one could be more efficient than here.
  *****************************************************************************/
-node_ptr_t nth_arg(narg)
+node_ptr_t nth_arg(int narg)
 {
 
         node_ptr_t rest_args;
@@ -97,8 +106,7 @@ node_ptr_t nth_arg(narg)
 Returns true if the type of the first arg to the call is equal
  to the argument of the function.
  **********************************************************************/
-type_first_arg(type)
-objtype_t type;
+int type_first_arg(objtype_t type)
 {
 dereference(Arguments, SubstGoal);
 if(NODEPTR_TYPE(DerefNode) != PAIR)
@@ -110,8 +118,7 @@ if(NODEPTR_TYPE(DerefNode) != PAIR)
 
 /*-------------------------------------------------------------------*/
 /* unify the nth argument of goal with an int of value val */
-bind_int(narg, val)
-integer val;
+int bind_int(int narg,integer val)
 {
         extern subst_ptr_t Subst_mem;
         node_ptr_t nodeptr, get_node();
@@ -128,8 +135,7 @@ integer val;
 #ifdef CHARACTER
 /*-------------------------------------------------------------------*/
 /* unify the nth argument of goal with a char of value val */
-bind_character(narg, val)
-uchar_t val;
+int bind_character(int narg, uchar_t val)
 {
         extern subst_ptr_t Subst_mem;
         node_ptr_t nodeptr, get_node();
@@ -147,8 +153,7 @@ uchar_t val;
 #ifdef REAL
 /*-------------------------------------------------------------------*/
 /* unify the nth argument of goal with a real of value val */
-bind_real(narg, val)
-real val;
+int bind_real(int narg, real val)
 {
         node_ptr_t nodeptr, get_node();
         real_ptr_t realptr, get_real();
@@ -167,8 +172,7 @@ real val;
 
 /*-------------------------------------------------------------------*/
 /* unify the nth argument of goal with an int of value val */
-bind_clause(narg, val)
-clause_ptr_t val;
+int bind_clause(int narg, clause_ptr_t val)
 {
         node_ptr_t nodeptr, get_node();
         extern subst_ptr_t Subst_mem;
@@ -185,8 +189,7 @@ clause_ptr_t val;
 
 /*-------------------------------------------------------------------*/
 /* unify the nth argument of goal with an atom*/
-bind_atom(narg, atomptr)
-atom_ptr_t atomptr;
+int bind_atom(int narg, atom_ptr_t atomptr)
 {
         extern subst_ptr_t Subst_mem;
         node_ptr_t nodeptr, get_node();
@@ -201,8 +204,7 @@ atom_ptr_t atomptr;
 }
 /*-------------------------------------------------------------------*/
 /* unify the nth argument of goal with a copy of the string*/
-bind_string(narg, stringptr)
-string_ptr_t stringptr;
+int bind_string(int narg,string_ptr_t stringptr)
 {
         extern subst_ptr_t Subst_mem;
         node_ptr_t nodeptr, get_node();
@@ -263,8 +265,7 @@ for(i = 1 ; i < MAXOPEN; i++)
 
 }
 
-open_output(filename)
-char *filename;
+int open_output(char *filename)
 {
 int i, unused;
 FILE *ofp;
@@ -307,7 +308,7 @@ else
 }
 
 
-Ptell()
+int Ptell()
 {
         char *filename;
 
@@ -336,7 +337,7 @@ INTERNAL_ERROR("telling");
 return(NULL);
 }
 
-Ptelling()
+int Ptelling()
 {
 return(bind_string(1, get_output_name()));
 }
@@ -346,8 +347,7 @@ return(bind_string(1, get_output_name()));
 As in Edinburgh Prolog.
  Closes current outfile.
  ******************************************************************************/
-close_output(ofp)
-FILE *ofp;
+int close_output(FILE *ofp)
 {
 int i;
 
@@ -368,7 +368,7 @@ INTERNAL_ERROR("close_output");
 return(0);/* for lint */
 }
 
-Ptold()
+int Ptold()
 {
         return(close_output(Curr_outfile));
 }
@@ -377,7 +377,7 @@ Ptold()
                 (display <anything_to_display:argument>)
                 (display <anything_to_display:argument> <var:output length>)
 ***********************************************************************/
-Pdisplay()      /* display term                 */
+int Pdisplay()      /* display term                 */
 {
 	int len;
 	if(!nth_arg(1))return(nargerr(1));
@@ -391,7 +391,7 @@ Pdisplay()      /* display term                 */
 /**********************************************************************
                 (writes <output_string:string>)
 ***********************************************************************/
-Pwrites()       /* write string without quotes */
+int Pwrites()       /* write string without quotes */
 {
         char *s;
 
@@ -404,7 +404,7 @@ Pwrites()       /* write string without quotes */
                         (put <ascii_code:integer>)
  As in Edinburgh Prolog.
  **********************************************************************/
-Pput()
+int Pput()
 {
         integer c;
 
@@ -419,7 +419,7 @@ Pput()
                         (nl)
 As in Edinburgh Prolog.
 ***********************************************************************/
-Pnl()           /* write newline                */
+int Pnl()           /* write newline                */
 {
         pr_string("\n");
         return(TRUE);
@@ -429,7 +429,7 @@ Pnl()           /* write newline                */
                         (fail)
 As in Edinburgh Prolog.
 ***********************************************************************/
-Pfail()         /* use this to fail             */
+int Pfail()         /* use this to fail             */
 {
         return(FAIL);
 }
@@ -437,7 +437,7 @@ Pfail()         /* use this to fail             */
 /**********************************************************************
                                 (quit)
 ***********************************************************************/
-Pquit()         /* leave prolog                 */
+int Pquit()         /* leave prolog                 */
 {
         return(QUIT);
 }
@@ -445,7 +445,7 @@ Pquit()         /* leave prolog                 */
 /**********************************************************************
                                 (abort)
 ***********************************************************************/
-Pabort()                /* leave prolog                 */
+int Pabort()                /* leave prolog                 */
 {
         return(ABORT);
 }
@@ -456,7 +456,7 @@ Pabort()                /* leave prolog                 */
  define it as a builtin rather than as rules because it wont overflow
  the stack this way.
  *********************************************************************/
-Prepeat()
+int Prepeat()
 {
 	return (ND_SUCCESS);
 }
@@ -466,7 +466,7 @@ Prepeat()
  Backtrack through the numbers from 0 to limit
  ******************************************************************************/
 
-Pgennum()
+int Pgennum()
 {
    extern subst_ptr_t OldSubstTop , Subst_ptr;
    extern node_ptr_t **OldTrailTop,**Trail_ptr;
@@ -522,7 +522,7 @@ As in Edinburgh Prolog.
 To be honest implementations of cut are never quite the same
 because the behaviour of (not(not (cut))) will vary !
 ***********************************************************************/
-Pcut()          /* infamous cut control pred    */
+int Pcut()          /* infamous cut control pred    */
 {
         do_cut();/* see prlush.c */
         return(TRUE);
@@ -532,7 +532,7 @@ Pcut()          /* infamous cut control pred    */
                         (integer <thing_tested:argument>)
 As in Edinburgh Prolog.
 ***********************************************************************/
-Pinteger()      /* test if argument is integer  */
+int Pinteger()      /* test if argument is integer  */
 {
         return(type_first_arg(INT));
 }
@@ -540,7 +540,7 @@ Pinteger()      /* test if argument is integer  */
                         (atom <thing_tested:argument>)
 As in Edinburgh Prolog.
 ***********************************************************************/
-Patom() /* test if argument is atom     */
+int Patom() /* test if argument is atom     */
 {
         return(type_first_arg(ATOM));
 }
@@ -549,7 +549,7 @@ Patom() /* test if argument is atom     */
 /**********************************************************************
                         (real <thing_tested:argument>)
 ***********************************************************************/
-Preal() /* test if argument is real*/
+int Preal() /* test if argument is real*/
 {
         return(type_first_arg(REAL));
 }
@@ -558,7 +558,7 @@ Preal() /* test if argument is real*/
 /**********************************************************************
                         (string <thing_tested:argument>)
 ***********************************************************************/
-Pstring()       /* test if argument is string   */
+int Pstring()       /* test if argument is string   */
 {
         return(type_first_arg(STRING));
 }
@@ -567,7 +567,7 @@ Pstring()       /* test if argument is string   */
                         (var <thing_tested:argument>)
 As in Edinburgh Prolog.
 ***********************************************************************/
-Pvar()          /* test if argument is variable */
+int Pvar()          /* test if argument is variable */
 {
         return(type_first_arg(VAR));
 }
@@ -575,7 +575,7 @@ Pvar()          /* test if argument is variable */
                         (nonvar <thing_tested:argument>)
 As in Edinburgh Prolog.
 ***********************************************************************/
-Pnonvar()               /* test if argument is not variable */
+int Pnonvar()               /* test if argument is not variable */
 {
         switch(type_first_arg(VAR))
 		{
@@ -591,7 +591,7 @@ Pnonvar()               /* test if argument is not variable */
                         (atomic <thing_tested:argument>)
 As in Edinburgh Prolog.
 ***********************************************************************/
-Patomic()               /* test if argument is atomic */
+int Patomic()               /* test if argument is atomic */
 {
 	if(!nth_arg(1))return(nargerr(1));
 
@@ -615,7 +615,7 @@ Patomic()               /* test if argument is atomic */
 /**********************************************************************
                         (iplus <arg1:integer><arg2:integer><sum:argument>)
 ***********************************************************************/
-Piplus() /* third arg is sum of first two (integers only) */
+int Piplus() /* third arg is sum of first two (integers only) */
 {
         integer i1, i2;
 
@@ -628,7 +628,7 @@ Piplus() /* third arg is sum of first two (integers only) */
 /**********************************************************************
                         (iminus <arg1:integer><arg2:integer><difference:argument>)
 ***********************************************************************/
-Piminus() /* third arg is difference of first two (integers only) */
+int Piminus() /* third arg is difference of first two (integers only) */
 {
         integer i1, i2;
 
@@ -641,7 +641,7 @@ Piminus() /* third arg is difference of first two (integers only) */
 /**********************************************************************
                         (imult <arg1:integer><arg2:integer><argument>)
 ***********************************************************************/
-Pimult() /* third arg is product of first two (integers only) */
+int Pimult() /* third arg is product of first two (integers only) */
 {
         integer i1, i2;
 
@@ -655,7 +655,7 @@ Pimult() /* third arg is product of first two (integers only) */
 /**********************************************************************
                         (rplus <arg1:integer><arg2:integer><argument>)
 ***********************************************************************/
-Prplus() /* third arg is sum of first two (reals only) */
+int Prplus() /* third arg is sum of first two (reals only) */
 {
         real r1, r2;
 
@@ -670,7 +670,7 @@ Prplus() /* third arg is sum of first two (reals only) */
                         (iless <arg1:integer><arg2:integer>)
 ***********************************************************************/
 /* compares integers - you should generalise this to make it more useful */
-Piless()
+int Piless()
 {
         integer i1, i2;
 
@@ -683,7 +683,7 @@ Piless()
                         (rless <arg1:real><arg2:real>)
 ***********************************************************************/
 /* compares reals - you should generalise this to make it more useful */
-Prless()
+int Prless()
 {
         real i1, i2;
 
@@ -697,7 +697,7 @@ Prless()
                         (ileq <arg1:integer><arg2:integer>)
 ***********************************************************************/
 /* compares integers - you should generalise this to make it more useful */
-Pileq()
+int Pileq()
 {
         integer i1, i2;
 
@@ -718,7 +718,7 @@ Most unlike Prolog!
  * which is not efficient.
  */
 
-Pimodify()
+int Pimodify()
 {
         integer i2;
 
@@ -734,8 +734,7 @@ Pimodify()
  Make <string> the current infile.
 As in Edinburgh Prolog except that the argument is a string or variable.
  **********************************************************************/
-open_input(filename)
-char *filename;
+int open_input(char *filename)
 {
 int i, unused;
 FILE *ifp;
@@ -777,7 +776,7 @@ else
   }
 }
 
-Psee()
+int Psee()
 {
         char *filename;
         ARG_STRING(1, filename);
@@ -805,7 +804,7 @@ INTERNAL_ERROR("seeing");
 return(NULL);
 }
 
-Pseeing()
+int Pseeing()
 {
 return(bind_string(1, get_input_name()));
 }
@@ -815,8 +814,7 @@ return(bind_string(1, get_input_name()));
  Close current infile.
 As in Edinburgh Prolog.
  **********************************************************************/
-close_input(ifp)
-FILE *ifp;
+int close_input(FILE *ifp)
 {
 int i;
 
@@ -837,7 +835,7 @@ INTERNAL_ERROR("close_input");
 return(0);/* for lint */
 }
 
-Pseen()
+int Pseen()
 {
         return(close_input(Curr_infile));
 }
@@ -848,7 +846,7 @@ Pseen()
 Curr_infile.
 As in Edinburgh Prolog.
  **********************************************************************/
-Pget()
+int Pget()
 {
         return(bind_int(1, (integer)getachar()));
 }
@@ -858,9 +856,9 @@ Pget()
                         (consult <filename:string>)
 As in Edinburgh Prolog (apart from consult user)
 ***********************************************************************/
-Pconsult()      /* load file                    */
+int Pconsult()      /* load file                    */
 {
-        char *filename;
+    char *filename;
 
 	if(!nth_arg(1))return(nargerr(1));
 
@@ -890,7 +888,7 @@ Pconsult()      /* load file                    */
                         (listing <predicate:atom>)
 As in Edinburgh Prolog.
 ***********************************************************************/
-Plisting()              /* list clauses of predicate    */
+int Plisting()              /* list clauses of predicate    */
 {
         atom_ptr_t atomptr;
 
@@ -912,18 +910,18 @@ Plisting()              /* list clauses of predicate    */
                         (trace)
 As in Edinburgh Prolog.
 ***********************************************************************/
-Ptrace()                /* turn trace on                */
+int Ptrace()                /* turn trace on                */
 {
-        Trace_flag = 1;
+    Trace_flag = 1;
 	Tracing_now = 1; /* added 12/25/91 */
-        return(TRUE);
+    return(TRUE);
 }
 
 /**********************************************************************
                         (notrace)
 As in Edinburgh Prolog.
 ***********************************************************************/
-Pnotrace()              /* turn trace off               */
+int Pnotrace()              /* turn trace off               */
 {
         Trace_flag = 0;
         return(TRUE);
@@ -934,7 +932,7 @@ Pnotrace()              /* turn trace off               */
  Does not switch tracing on per se but when called all new frames
  contain enough information so that reverse tracing is possible.
  **********************************************************************/
-Preverse_trace()
+int Preverse_trace()
 {
 extern int ReverseTraceMode;
 ReverseTraceMode = 1;
@@ -945,7 +943,7 @@ return TRUE;
  		no_reverse_trace_mode
  reverts to normal execution.
  **********************************************************************/
-Pno_reverse_trace()
+int Pno_reverse_trace()
 {
 extern int ReverseTraceMode;
 ReverseTraceMode = 0;
@@ -957,7 +955,7 @@ return TRUE;
  Unactivate trace.
  *******************************************************************************/
 
-Psuspend_trace()
+int Psuspend_trace()
 {
         Trace_flag--;
         return 1;
@@ -969,7 +967,7 @@ Psuspend_trace()
  You might want to make use of statements of the form 
 	if(Trace_flag > 1)....
  ******************************************************************************/
-Presume_trace()
+int Presume_trace()
 {
         Trace_flag++;
         return 1;
@@ -981,7 +979,7 @@ Presume_trace()
  *****************************************************************************/
 FILE *Log_file;
 
-Plogging()
+int Plogging()
 {
         char *log_filename;
 
@@ -1000,7 +998,7 @@ Plogging()
                         (nologging)
  Closes the logging file, turns logging off.
  *****************************************************************************/
-Pnologging()
+int Pnologging()
 {
         if(Log_file != NULL)
                 fclose(Log_file);
@@ -1018,7 +1016,7 @@ Pnologging()
  Succeeds iff the string is the name of an atom.
  Unifies the second argument with this atom if success.
  ******************************************************************************/
-Pinterned()
+int Pinterned()
 {
         atom_ptr_t the_atom, hash_search();
         char *s;
@@ -1038,7 +1036,7 @@ Pinterned()
 Unifies the argument with the first predicate defined by
 the user or in sprolog.ini .
  **********************************************************************/
-Pfirst_predicate()
+int Pfirst_predicate()
 {
         extern pred_rec_ptr_t First_pred;
         return(bind_atom(1, First_pred->atom));
@@ -1052,7 +1050,7 @@ Pfirst_predicate()
  Owing to the fact we didnt give the interpreter explicit access to 
  the predicate record pointer this builtin is rather slow.
  ***********************************************************************/
-Pnext_predicate()
+int Pnext_predicate()
 {
         extern pred_rec_ptr_t First_pred;
         pred_rec_ptr_t predrptr;
@@ -1080,7 +1078,7 @@ Pnext_predicate()
                         (builtin <predicate:atom>)
 Succeeds if argument is a builtin predicate. 
 **********************************************************************/
-Pbuiltin()
+int Pbuiltin()
 {
         atom_ptr_t atomptr;
         ARG_ATOM(1, atomptr);
@@ -1093,7 +1091,7 @@ Pbuiltin()
 Unifies the second argument with the first clause of the predicate
 if one exists and fails otherwise.
 ***********************************************************************/
-Pfirst_clause()
+int Pfirst_clause()
 {
         atom_ptr_t atomptr;
 
@@ -1113,7 +1111,7 @@ Pfirst_clause()
 Unifies the second argument with the clause after the first argument if one exists
 and fails otherwise.
 ***********************************************************************/
-Pnext_clause()
+int Pnext_clause()
 {
         clause_ptr_t clause1ptr, clause2ptr;
 
@@ -1130,7 +1128,7 @@ Pnext_clause()
 You need this to get at the list which is the body of the clause.
 See how the "clause" predicate is defined in sprolog.ini.
 ***********************************************************************/
-Pbody_clause()
+int Pbody_clause()
 {
         pair_ptr_t pairptr, get_pair();
         clause_ptr_t clauseptr;
@@ -1171,7 +1169,7 @@ Pbody_clause()
  The use of fscanf would have been too rudimentary.
  *****************************************************************************/
 
-Pread_word()
+int Pread_word()
 {
         extern char *Read_buffer;
 	extern int Ch;
@@ -1221,7 +1219,7 @@ Pread_word()
 Read a prolog object. If you want to access the variable names
 then do it with var_name before the next call to this or to a consult.
 ***********************************************************************/
-Pread()
+int Pread()
 {
         extern varindx Nvars;
         node_ptr_t node2ptr, get_node(), parse();
@@ -1243,7 +1241,7 @@ Pread()
  argument. 
  This could be used for metaprogramming.
  ******************************************************************************/
-Pvar_offset()
+int Pvar_offset()
 {
         node_ptr_t nodeptr;
         integer corrected_offset;
@@ -1265,7 +1263,7 @@ It can be used if you want to keep the names of the variables in
 some way.
 See the file xread.pro
  *********************************************************************/
-Pvar_name()
+int Pvar_name()
 {
 	varindx i;
 	char *var_name(), *s;/* from prparse.c */
@@ -1286,7 +1284,7 @@ Pvar_name()
 #if 0/* There is a bug here, we can implement this in prolog  
       * This has been done in sprolog.ini
       */
-Pallfacts()             /* allfacts(Template, List_of_these) (io) */
+int Pallfacts()             /* allfacts(Template, List_of_these) (io) */
 {
         extern subst_ptr_t Subst_ptr, Subst_mem;
         extern node_ptr_t NilNodeptr, get_node();
@@ -1375,7 +1373,7 @@ Pallfacts()             /* allfacts(Template, List_of_these) (io) */
 Adds a new clause to the end of its packet.
 As in Edinburgh Prolog.
 ***********************************************************************/
-Passertz()
+int Passertz()
 {
         if(!nth_arg(1))return(CRASH);
 
@@ -1394,7 +1392,7 @@ Adds a new clause to the beginning of its packet - unless there
 is a 2nd argument which indicates the position in which the clause
 is added.
 ***********************************************************************/
-Passerta()
+int Passerta()
 {
         node_ptr_t body;
         subst_ptr_t body_substptr;
@@ -1431,7 +1429,7 @@ This will seem identical to temp_assertz and may be freely intermixed
 - the only difference being that clean_temp removes those clauses
 added by temp_assertz (as if they had been marked).
 ***********************************************************************/
-Ptemp_assertz()
+int Ptemp_assertz()
 {
         if(!nth_arg(1))return(CRASH);
 
@@ -1448,7 +1446,7 @@ Adds a new clause to the beginning of its packet.
 But in temporary zone.
 The existence of a second argument implies the clause is inserted as nth
 ***********************************************************************/
-Ptemp_asserta()
+int Ptemp_asserta()
 {
         node_ptr_t body;
         subst_ptr_t body_substptr;
@@ -1477,7 +1475,7 @@ Ptemp_asserta()
 /***********************************************************************
                         (remove_clause <bound variable:clause>)
  ***********************************************************************/
-Premove_clause()
+int Premove_clause()
 {
         atom_ptr_t atomptr;
         clause_ptr_t clauseptr;
@@ -1493,7 +1491,7 @@ Premove_clause()
                         (clean_temp )
 Clean the temporary zone;
 ***********************************************************************/
-Pclean_temp()
+int Pclean_temp()
 {
         clean_temp(); /* see pralloc.c */
         return(1);
@@ -1504,7 +1502,7 @@ Pclean_temp()
                 (clock <output_seconds:variable>)
 Counts microseconds elapsed since first call of clock.
  ************************************************************************/
-Pclock()
+int Pclock()
 {
         //long clock();
         return(bind_int(1, (integer)clock()));
@@ -1515,7 +1513,7 @@ Pclock()
                 (n_unifications <output_count:variable>)
  Counts number of unifications
  ************************************************************************/
-Pn_unifications()
+int Pn_unifications()
 {
         extern integer Nunifications;
         return(bind_int(1, Nunifications));
@@ -1529,7 +1527,7 @@ Pn_unifications()
 Extracts a copy of the string that looks like the print representation
 of the object.
  ************************************************************************/
-Pstring_from()
+int Pstring_from()
 {
         long offset_subst();
         node_ptr_t nodeptr;
@@ -1545,17 +1543,17 @@ Pstring_from()
         case ATOM:
                 return(bind_string(2, ATOMPTR_NAME(NODEPTR_ATOM(nodeptr))));
         case INT:
-                sprintf(Print_buffer, "%ld", NODEPTR_INT(nodeptr));
+                sprintf(Print_buffer, "%lld", NODEPTR_INT(nodeptr));
                 return(bind_string(2, Print_buffer));
 #ifdef REAL
         case REAL:
-                sprintf(Print_buffer, "%ld", NODEPTR_INT(nodeptr));
+                sprintf(Print_buffer, "%lld", NODEPTR_INT(nodeptr));
                 return(bind_string(2, Print_buffer));
 #endif
         case STRING:
                 return(bind_string(2, NODEPTR_STRING(nodeptr)));
         case VAR:
-                sprintf(Print_buffer, "_%d_%ld", NODEPTR_OFFSET(nodeptr)/sizeof(struct subst),
+                sprintf(Print_buffer, "_%lu_%ld", NODEPTR_OFFSET(nodeptr)/sizeof(struct subst),
                     offset_subst(DerefSubst));
                 return(bind_string(2, Print_buffer));
         default:
@@ -1567,7 +1565,7 @@ Pstring_from()
                         (string_length <input:string> <variable>)
                         (string_length <input:string> <integer>)
  ************************************************************************/
-Pstring_length()
+int Pstring_length()
 {
         char *s;
 
@@ -1581,7 +1579,7 @@ Pstring_length()
                         (string_nth <index:integer> <string> <output:char>)
 Extract  the nth char of the string.
 ************************************************************************/
-Pstring_nth()
+int Pstring_nth()
 {
         char *s;
         int i;
@@ -1599,7 +1597,7 @@ Pstring_nth()
                         (string_nth <index:integer> <string> <output:integer>)
 Extract the ascii code of the nth char of the string.
 ************************************************************************/
-Pstring_nth()
+int Pstring_nth()
 {
         char *s;
         int i;
@@ -1617,7 +1615,7 @@ Pstring_nth()
                         (string_concat <string><string><variable>)
  The third argument is the concatenation of the first two.
  ******************************************************************************/
-Pstring_concat()
+int Pstring_concat()
 {
         char *s, *s1, *s2;
 
@@ -1637,7 +1635,7 @@ Pstring_concat()
  The third argument is the suffix of the second from position given by the
  first argument
  ******************************************************************************/
-Pstring_suffix()
+int Pstring_suffix()
 {
         char *s;
         integer offset;
@@ -1652,7 +1650,7 @@ Pstring_suffix()
         (space_left <var> <var> <var> <var> <var> <var>)
  Returns space left in each zone. (see sprolog.inf)
  ************************************************************************/
-Pspace_left()
+int Pspace_left()
 {
         zone_size_t h, str, d, su, tr, te;
 
@@ -1671,7 +1669,7 @@ Pspace_left()
  ******************************************************************************/
 
 #ifdef STATISTICS 
-Pconsumption()
+int Pconsumption()
 {
         extern zone_size_t  Atom_consumption,
         Pair_consumption,
@@ -1699,7 +1697,7 @@ Pconsumption()
 #endif
 #ifdef HUNTBUGS
 /* see prdebug.c */
-Pbughunt()
+int Pbughunt()
 {
 	extern int Bug_hunt_flag;
 
@@ -1713,7 +1711,7 @@ Pbughunt()
  * succeed or fail randomly 						*
  * My Unix rand() function is not very random
  ************************************************************************/
-Prandom_decision()
+int Prandom_decision()
 {
 extern int rand();
 #ifdef CLOCK
@@ -1727,7 +1725,7 @@ return(((rand()) % 2)? TRUE: FALSE);
  		(random <output:variable> <limit:integer>)
  Returns a random integer less than or equal to the limit.
  ****************************************************************************/
-Prand()
+int Prand()
 {
 integer limit, randnum;
 
@@ -1746,88 +1744,88 @@ recompile this one every time.
 ***********************************************************************/
 void ini_builtin()
 {
-        ini_named_files();
-        make_builtin(Ptell, 	"tell");
-        make_builtin(Ptelling, 	"telling");
-        make_builtin(Pseeing, 	"seeing");
-        make_builtin(Ptold, 	"told");
-        make_builtin(Pdisplay, 	"display");
-        make_builtin(Pwrites, 	"writes");
-        make_builtin(Pnl, 	"nl");
-        make_builtin(Pput, 	"put");
-        make_builtin(Pfail, 	"fail");
-        make_builtin(Pabort, 	"abort");
-        make_builtin(Pquit, 	"quit");
-        make_builtin(Prepeat, 	"repeat");
+    ini_named_files();
+    make_builtin(Ptell, 	"tell");
+    make_builtin(Ptelling, 	"telling");
+    make_builtin(Pseeing, 	"seeing");
+    make_builtin(Ptold, 	"told");
+    make_builtin(Pdisplay, 	"display");
+    make_builtin(Pwrites, 	"writes");
+    make_builtin(Pnl, 	"nl");
+    make_builtin(Pput, 	"put");
+    make_builtin(Pfail, 	"fail");
+    make_builtin(Pabort, 	"abort");
+    make_builtin(Pquit, 	"quit");
+    make_builtin(Prepeat, 	"repeat");
 	make_builtin(Pgennum,	"gennum");
-        make_builtin(Pcut, 	"cut");
-        make_builtin(Pconsult, 	"consult");
-        make_builtin(Psee, 	"see");
-        make_builtin(Pseen, 	"seen");
-        make_builtin(Plisting, 	"listing");
+    make_builtin(Pcut, 	"cut");
+    make_builtin(Pconsult, 	"consult");
+    make_builtin(Psee, 	"see");
+    make_builtin(Pseen, 	"seen");
+    make_builtin(Plisting, 	"listing");
 #if TRACE_CAPABILITY
-        make_builtin(Ptrace, 	"trace");
-        make_builtin(Pnotrace, 	"notrace");
-        make_builtin(Psuspend_trace, "suspend_trace");
-        make_builtin(Presume_trace, "resume_trace");
-        make_builtin(Preverse_trace, "reverse_trace_mode");
-        make_builtin(Pno_reverse_trace, "no_reverse_trace_mode");
+    make_builtin(Ptrace, 	"trace");
+    make_builtin(Pnotrace, 	"notrace");
+    make_builtin(Psuspend_trace, "suspend_trace");
+    make_builtin(Presume_trace, "resume_trace");
+    make_builtin(Preverse_trace, "reverse_trace_mode");
+    make_builtin(Pno_reverse_trace, "no_reverse_trace_mode");
 
 #endif
 #ifdef LOGGING_CAPABILITY
-        make_builtin(Plogging, "logging");
-        make_builtin(Pnologging, "nologging");
+    make_builtin(Plogging, "logging");
+    make_builtin(Pnologging, "nologging");
 #endif
-        make_builtin(Pinteger, 	"integer");
-        make_builtin(Patom, 	"atom");
-        make_builtin(Pinterned, "interned");
-        make_builtin(Pvar, 	"var");
-        make_builtin(Pnonvar, 	"nonvar");
-        make_builtin(Patomic, 	"atomic");
+    make_builtin(Pinteger, 	"integer");
+    make_builtin(Patom, 	"atom");
+    make_builtin(Pinterned, "interned");
+    make_builtin(Pvar, 	"var");
+    make_builtin(Pnonvar, 	"nonvar");
+    make_builtin(Patomic, 	"atomic");
 #ifdef REAL
-        make_builtin(Preal, 	"real");
+    make_builtin(Preal, 	"real");
 #endif
-        make_builtin(Pstring, 	"string");
-        make_builtin(Pbuiltin, 	"builtin");
-        make_builtin(Pstring_from, "string_from");
-        make_builtin(Pstring_length, "string_length");
-        make_builtin(Pstring_nth, "string_nth");
-        make_builtin(Pstring_concat, "string_concat");
-        make_builtin(Pstring_suffix, "string_suffix");
+   make_builtin(Pstring, 	"string");
+   make_builtin(Pbuiltin, 	"builtin");
+   make_builtin(Pstring_from, "string_from");
+   make_builtin(Pstring_length, "string_length");
+   make_builtin(Pstring_nth, "string_nth");
+   make_builtin(Pstring_concat, "string_concat");
+   make_builtin(Pstring_suffix, "string_suffix");
 #ifdef REAL
-        make_builtin(Prplus, 	"rplus");
-        make_builtin(Prless, 	"rless");
+   make_builtin(Prplus, 	"rplus");
+   make_builtin(Prless, 	"rless");
 #endif
-        make_builtin(Piplus, 	"iplus");
-        make_builtin(Piminus, 	"iminus");
-        make_builtin(Pimult, 	"imult");
-        make_builtin(Piless, 	"iless");
-        make_builtin(Pileq, "ileq");
-        make_builtin(Pimodify, "imodify");
-        /*      make_builtin(Pallfacts, "allfacts"); */
-        make_builtin(Pbody_clause, "body_clause");
-        make_builtin(Pfirst_clause, "first_clause");
-        make_builtin(Pnext_clause, "next_clause");
-        make_builtin(Pvar_offset, "var_offset");
-        make_builtin(Pvar_name, "var_name");
-        make_builtin(Pfirst_predicate, "first_predicate");
-        make_builtin(Pnext_predicate, "next_predicate");
-        make_builtin(Passerta, "asserta");
-        make_builtin(Passertz, "assertz");
-        make_builtin(Ptemp_asserta, "temp_asserta");
-        make_builtin(Ptemp_assertz, "temp_assertz");
-        make_builtin(Premove_clause, "remove_clause");
-        make_builtin(Pclean_temp, "clean_temp");
-        make_builtin(Pread, 	"read");
-        make_builtin(Pread_word, "read_word");
-        make_builtin(Pget, 	"get");
+   make_builtin(Piplus, 	"iplus");
+   make_builtin(Piminus, 	"iminus");
+   make_builtin(Pimult, 	"imult");
+   make_builtin(Piless, 	"iless");
+   make_builtin(Pileq, "ileq");
+   make_builtin(Pimodify, "imodify");
+   /*      make_builtin(Pallfacts, "allfacts"); */
+   make_builtin(Pbody_clause, "body_clause");
+   make_builtin(Pfirst_clause, "first_clause");
+   make_builtin(Pnext_clause, "next_clause");
+   make_builtin(Pvar_offset, "var_offset");
+   make_builtin(Pvar_name, "var_name");
+   make_builtin(Pfirst_predicate, "first_predicate");
+   make_builtin(Pnext_predicate, "next_predicate");
+   make_builtin(Passerta, "asserta");
+   make_builtin(Passertz, "assertz");
+   make_builtin(Ptemp_asserta, "temp_asserta");
+   make_builtin(Ptemp_assertz, "temp_assertz");
+   make_builtin(Premove_clause, "remove_clause");
+   make_builtin(Pclean_temp, "clean_temp");
+   make_builtin(Pread, 	"read");
+   make_builtin(Pread_word, "read_word");
+   make_builtin(Pget, 	"get");
 #ifdef CLOCK
-        make_builtin(Pclock, 	"clock");
+   make_builtin(Pclock, 	"clock");
 #endif
-        make_builtin(Pn_unifications, "n_unifications");
-        make_builtin(Pspace_left, "space_left");
+    make_builtin(Pn_unifications, "n_unifications");
+    make_builtin(Pspace_left, "space_left");
 #ifdef STATISTICS
-        make_builtin(Pconsumption, "consumption");
+    make_builtin(Pconsumption, "consumption");
 #endif
 #ifdef HUNTBUGS
 	make_builtin(Pbughunt,"bughunt");

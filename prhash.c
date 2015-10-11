@@ -2,10 +2,10 @@
 /* symbol table handling */
 
 #include <stdio.h>
-#include "prtypes.h"
-#ifndef ATARI
 #include <string.h>
-#endif
+#include "prmachine.h"
+
+#include "prtypes.h"
 
 
 #define HASHSIZE 103 /* a prime */
@@ -77,12 +77,11 @@ char *s;
 			intern()
  Add a new atom to the symbol table and return it.
  **********************************************************************/
-atom_ptr_t intern(s)
-char *s;
+atom_ptr_t intern(char *s)
 {
 	int hashval;
 	int status = PERMANENT;
-	atom_ptr_t the_el, previous;
+	atom_ptr_t the_el, previous = NULL;
 
 	ENTER("intern");
 	hashval = hash(s);
@@ -106,7 +105,7 @@ char *s;
 		{
 			the_el = make_atom(s, status);
 			previous->hash_link = the_el;
-		BUGHUNT(s);
+		// BUGHUNT(s);
 			return(the_el);
 		}
 		else
@@ -120,8 +119,7 @@ char *s;
 			make_atom()
  Makes an atom from a string. Does not insert it into hash table. 
  **********************************************************************/
-atom_ptr_t make_atom(s, status)
-char *s;/* name of atom */
+atom_ptr_t make_atom(char* s,int status)
 {
 	string_ptr_t get_string();
 	atom_ptr_t ret, get_atom();
@@ -139,14 +137,13 @@ char *s;/* name of atom */
 	ret->hash_link = HASHNULL;
 	ret->name = s2;
 	(ret->proc).clause = NULL;
-		BUGHUNT(s);
+	//	BUGHUNT(s);
 	return(ret);
 }
 
 #ifndef NDEBUG
 
-void pr_bucket(a)
-atom_ptr_t a;
+void pr_bucket(atom_ptr_t a)
 {
 while(a != HASHNULL)
      {

@@ -9,6 +9,10 @@
 #include "prtypes.h"
 #include "prlex.h"
 
+#include "prmachine.h"
+#include "prprint.h"
+#include "prlush.h"
+
 
 #ifndef NDEBUG
 #define CHK(X) if(!check_object(X))INTERNAL_ERROR("wild pointer");
@@ -79,8 +83,7 @@ for(result = 0L , p = start_watch_zone; p <= end_watch_zone;  p++)
 return(result);
 }
 
-bughunt(line, file, msg)
-char *file,*msg;
+int bughunt(int line, char *file, char *msg)
 {
 static int first_time = 1;
 

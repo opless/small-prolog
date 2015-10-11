@@ -126,3 +126,9 @@ typedef struct nd_cframe {
 
 extern atom_ptr_t LastBuiltin;
 
+int lush(int first_time);
+void query_loop();
+int initial_query(char *filename);
+void dump_ancestors(dyn_ptr_t cframe);
+
+void do_cut();

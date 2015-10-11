@@ -27,9 +27,10 @@ typedef short clflag_t;/* to contain flags for clauses */
 
 /***************************************************************************
  Integers.
- Integers are the same size as pointers.
+ Integers should be the same size as pointers.
+ TODO: this was 'long' which will cause problems, need to look into "integer" usage.
 ***************************************************************************/
-typedef long integer; 
+typedef long long integer;
 
 /***************************************************************************
  Strings.

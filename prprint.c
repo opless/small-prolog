@@ -8,8 +8,10 @@
 #include <ctype.h>
 #include "prtypes.h"
 #include "prlex.h"
+#include "pralloc.h"
 #include "prprint.h"
 #include "prmachine.h"
+#include "prunify.h"
 
 #ifndef NDEBUG
 #define CHK(X) if(!check_object(X))INTERNAL_ERROR("wild pointer");
@@ -30,7 +32,7 @@ extern node_ptr_t Printing_var_nodeptr;
 You might want to empty the keyboard buffer here.
  *******************************************************************/
 
-prompt_user()
+int prompt_user()
 {
 #ifdef LINE_EDITOR /* not provided */
 	empty_buffer();
@@ -140,7 +142,7 @@ subst_ptr_t substptr;/* this gives you the variable values */
 
 	case VAR:
 		offset = NODEPTR_OFFSET(nodeptr);
-		sprintf(Print_buffer, "_%d_%ld", offset/sizeof(struct subst),
+		sprintf(Print_buffer, "_%lu_%ld", offset/sizeof(struct subst),
 		    offset_subst(substptr));
 		return(pr_string(Print_buffer));
 
@@ -157,7 +159,7 @@ subst_ptr_t substptr;/* this gives you the variable values */
 #endif
 
 	case INT:
-		sprintf(Print_buffer, "%ld", NODEPTR_INT(nodeptr));
+		sprintf(Print_buffer, "%lld", NODEPTR_INT(nodeptr));
 		return(pr_string(Print_buffer));
 
 	case PAIR:
@@ -249,7 +251,7 @@ int pr_node(node_ptr_t nodeptr)
 	atom_ptr_t atomptr;
 	varindx offset;
 
-	CHK(nodeptr);
+	CHK((char*)nodeptr);
 
 	switch(NODEPTR_TYPE(nodeptr))
 	{
@@ -275,7 +277,7 @@ int pr_node(node_ptr_t nodeptr)
 #endif
 
 	case INT:
-		sprintf(Print_buffer, "%ld", NODEPTR_INT(nodeptr));
+		sprintf(Print_buffer, "%lld", NODEPTR_INT(nodeptr));
 		return(pr_string(Print_buffer));
 
 	case PAIR:
@@ -299,7 +301,7 @@ int pr_node(node_ptr_t nodeptr)
 			pr_pair()
  *******************************************************************/
 
-pr_pair(pair_ptr_t pairptr)
+int pr_pair(pair_ptr_t pairptr)
 {
 	int len;
 

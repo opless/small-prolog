@@ -5,9 +5,12 @@
 
 #include <stdio.h>
 #include <ctype.h>
+#include <string.h>
+
 #include "prtypes.h"
 #include "prlex.h"
-
+#include "prmachine.h"
+#include "prcnsult.h"
 
 #define TOOMANYVARS "too many vars"
 #define PARSERRMSG "parsing error"
@@ -64,10 +67,10 @@ if(parse(FALSE, status, nodeptr) == NULL)
    return(NULL);
 
 if(NODEPTR_TYPE(nodeptr) != PAIR)
-   {
+{
    errmsg(NONLISTARG);
    return(NULL);
-   }
+}
 
 
 return(nodeptr);
@@ -121,7 +124,7 @@ switch(toktype)
 {
 case TOKEN_INT:
    type = INT;
-   if(!sscanf(Read_buffer, "%ld", &(NODEPTR_INT(nodeptr))))
+   if(!sscanf(Read_buffer, "%lld", &(NODEPTR_INT(nodeptr))))
       return (node_ptr_t)parserr(BADINT);
    break;	
 
@@ -203,7 +206,7 @@ char *s;
 char *ret;
 int how_long;
 
-how_long = strlen(s) + 1;
+how_long = (int)strlen(s) + 1;
 ret = Varbufptr;
 
 if(how_long >= (VarNameBuff  + VARBUFSIZE) -ret )

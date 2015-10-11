@@ -57,7 +57,11 @@
 #include <assert.h>  /* added this on Dec 21 1991 */
 #include "prtypes.h"
 #include "prlush.h"
-
+#include "prparse.h"
+#include "prprint.h"
+#include "prmachine.h"
+#include "prunify.h"
+#include "pralloc.h"
 
 #define NOTVARPRED "A variable can't be used as a predicate\n"
 #define NOPRED "Predicate not atom\n"
@@ -162,8 +166,7 @@ int Unleash_flag = 0;
  Called by query_loop.
  Updates Goals, Nvars and Query. 
  *******************************************************************/
-read_goals(ifp)
-FILE *ifp;
+int read_goals(FILE *ifp)
 {
 	extern node_ptr_t read_list(), get_node();
 	extern FILE * Curr_infile;
@@ -204,8 +207,7 @@ FILE *ifp;
 			initial_query
  This executes the query from a file . It is silent if the file does not exist.
  ******************************************************************************/
-initial_query(filename)
-char *filename;
+int initial_query(char *filename)
 {
 	FILE *ifp;
 	
@@ -232,8 +234,7 @@ char *filename;
  Not currently used, but why not modify main() to make use of it?
  ******************************************************************************/
 
-execute_query(s)
-char *s;
+int execute_query(char *s)
 {
 extern int String_input_flag;
 extern char *Curr_string_input;
@@ -378,8 +379,7 @@ void reset_zones()
  Call a builtin. Notice that it uses global variables to get 
  at the arguments of the builtin.
  *******************************************************************/
-do_builtin(bltn)
-intfun bltn; /* a function */
+int do_builtin(intfun bltn) /* a function */
 {
 	int ret;
 
@@ -470,8 +470,7 @@ void do_cut()
  Lets you look at the ancestors of the call when something has gone wrong.
  Should not be called dump_ancestors because it only shows the ancestors.
  ***************************************************************************/
-void dump_ancestors(cframe)
-dyn_ptr_t cframe;
+void dump_ancestors(dyn_ptr_t cframe)
 {
 	int i;
 	node_ptr_t goals;
@@ -616,8 +615,7 @@ int res = 1;
 return (res);
 }
 
-static  tr_exit(pwhere)
-int *pwhere;
+static  int tr_exit(int *pwhere)
 {
 
 int res = 1;
@@ -632,8 +630,7 @@ int res = 1;
 return(res);
 }
 
-static int tr_redo(pwhere)
-int *pwhere;
+static int tr_redo(int *pwhere)
 {
  int res = 1;
  if(!Tracing_now && Skip_above > Parent)
@@ -646,8 +643,7 @@ int *pwhere;
 return(res);
 }
 
-static int tr_call(pwhere)
-int *pwhere;
+static int tr_call(int *pwhere)
 {
 int res = 1;
     if(Tracing_now){
@@ -790,7 +786,7 @@ SELECT_GOAL:
 		Candidate = ATOMPTR_CLAUSE(Predicate);
 		/* - this was the FIRST clause */
 #ifdef HUNTBUGS
-		if(Candidate!=NULL && !check_object(Candidate))
+		if(Candidate!=NULL && !check_object((char *)Candidate))
 		  {
 		Curr_outfile = stdout;
 		pr_string(Predicate->name);
@@ -967,7 +963,7 @@ BACKTRACK:
 	LastBack =  FRAME_BACKTRACK(LastBack);
 	TRACE(tr_redo(&where));
 #ifdef HUNTBUGS
-		if(Candidate!=NULL && !check_object(Candidate))
+		if(Candidate!=NULL && !check_object((char *)Candidate))
 		  {
  		  dump_ancestors( LastCframe );
 		  fatal("error2 in code");

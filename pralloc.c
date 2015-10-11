@@ -7,6 +7,9 @@
 #include <stdio.h>
 #include "prtypes.h"
 #include "prmachine.h"
+#include "pralloc.h"
+
+void dump_ancestors(dyn_ptr_t cframe); // prlush.c
 
 #define NDEBUG 1 /* turn off checking */
 #define PAIRS_TOGETHER 1 
@@ -42,7 +45,6 @@
 */
 
 #define ADDRESS_DIFF(PTR1, PTR2) (char *)(PTR1) - (char *)(PTR2)
-typedef char *void_ptr_t;
 
 void alloc_err(), fatal_alloc_err(), clean_pred();
 
@@ -170,10 +172,9 @@ void ini_alloc()
 /*******************************************************************************
 			my_Heap_alloc()
  ******************************************************************************/
-static void_ptr_t my_Heap_alloc(how_much)
-my_alloc_size_t how_much;
+static void_ptr_t my_Heap_alloc(my_alloc_size_t how_much)
 {
-	void_ptr_t ret;
+	void_ptr_t ret=NULL;
 	ALIGN(how_much);
 
 	if(!CAN_ALLOC(how_much ,HighHeap_ptr, Heap_ptr))
@@ -190,10 +191,9 @@ my_alloc_size_t how_much;
 			my_Str_alloc()
 Allocate on permanent string space. 
  ******************************************************************************/
-static void_ptr_t my_Str_alloc(how_much)
-my_alloc_size_t how_much;
+static void_ptr_t my_Str_alloc(my_alloc_size_t how_much)
 {
-	void_ptr_t ret;
+	void_ptr_t ret=NULL;
 	ALIGN(how_much);
 
 	if(!(CAN_ALLOC(how_much, HighStr_ptr, Str_ptr)))
@@ -211,10 +211,9 @@ my_alloc_size_t how_much;
 Allocate on the control stack. 
 This is for objects that disappear on backtracking.
  ******************************************************************************/
-dyn_ptr_t my_Dyn_alloc(how_much)
-my_alloc_size_t how_much; /* in bytes */
+dyn_ptr_t my_Dyn_alloc(my_alloc_size_t how_much) /* in bytes */
 {
-	dyn_ptr_t ret;
+	dyn_ptr_t ret=NULL;
 	ALIGN(how_much);
 	if(!(CAN_ALLOC(how_much ,HighDyn_ptr, Dyn_ptr)))
 	{
@@ -232,7 +231,7 @@ my_alloc_size_t how_much; /* in bytes */
  ******************************************************************************/
 node_ptr_t ** my_Trail_alloc()
 {
-	node_ptr_t ** ret;
+	node_ptr_t ** ret=NULL;
 
 	if( Trail_ptr >= HighTrail_ptr)
 	{
@@ -250,10 +249,9 @@ Allocate how_much bytes on the substitution stack.
 This is more speed-efficient than allocating struct substs on an array of 
  structures, as there is no multiplication.
  ******************************************************************************/
-subst_ptr_t my_Subst_alloc(how_much)
-my_alloc_size_t how_much; /* in bytes */
+subst_ptr_t my_Subst_alloc(my_alloc_size_t how_much) /* in bytes */
 {
-	subst_ptr_t ret;
+	subst_ptr_t ret=NULL;
 #ifndef  NDEBUG
 	if(how_much % sizeof(struct subst))INTERNAL_ERROR("alignment");
 #endif	
@@ -273,10 +271,9 @@ Allocate in temporary memory.
 This is for objects that disappear
 when you clean that zone.
  ******************************************************************************/
-temp_ptr_t my_Temp_alloc(how_much)
-my_alloc_size_t how_much; /* in bytes */
+temp_ptr_t my_Temp_alloc(my_alloc_size_t how_much)/* in bytes */
 {
-	temp_ptr_t ret;
+	temp_ptr_t ret=NULL;
 	ALIGN(how_much);
 	if(!(CAN_ALLOC(how_much, HighTemp_ptr, Temp_ptr)))
 	{
@@ -292,14 +289,12 @@ my_alloc_size_t how_much; /* in bytes */
 			my_alloc()
  Allocate anywhere.
  ******************************************************************************/
-char *my_alloc(how_much, status)
-my_alloc_size_t how_much;
-int status;
+char *my_alloc(my_alloc_size_t how_much,int status)
 {
-#ifdef DEBUG
-char buff[80];
+//#ifdef DEBUG
+//char buff[80];
 //sprintf(buff, "my_alloc allocating %d of type %d\n",
-#endif
+//#endif
 	switch(status)
 	{
 	case PERMANENT:
@@ -322,8 +317,7 @@ char buff[80];
  between two far pointers 
  ******************************************************************************/
 
-long offset_subst(substptr)
-subst_ptr_t substptr;
+long offset_subst(subst_ptr_t substptr)
 {
 	return((long)(substptr - (subst_ptr_t)Subst_mem));
 }
@@ -332,8 +326,7 @@ subst_ptr_t substptr;
 			get_string()
 Allocate a string of length (how_much - 1)
  ******************************************************************************/
-string_ptr_t get_string(how_much, status)
-my_alloc_size_t how_much;
+string_ptr_t get_string(my_alloc_size_t how_much,int status)
 {
 #ifdef STATISTICS
 	String_consumption += how_much;
@@ -346,7 +339,7 @@ my_alloc_size_t how_much;
 			get_real()
  There is no need for a get_integer, as integers fit in a node.
  ******************************************************************************/
-real_ptr_t get_real(status)
+real_ptr_t get_real(int status)
 {
 #ifdef STATISTICS
 	Real_consumption += sizeof(real);
@@ -361,7 +354,7 @@ real_ptr_t get_real(status)
 /*******************************************************************************
 			get_atom();
  ******************************************************************************/
-atom_ptr_t get_atom(status)
+atom_ptr_t get_atom(int status)
 {
 #ifdef STATISTICS
 	Atom_consumption += sizeof(struct atom);
@@ -375,7 +368,7 @@ atom_ptr_t get_atom(status)
 /*******************************************************************************
 			get_pair()
  ******************************************************************************/
-pair_ptr_t get_pair(status)
+pair_ptr_t get_pair(int status)
 {
 #ifdef STATISTICS
 	Pair_consumption += sizeof(struct pair);
@@ -388,7 +381,7 @@ pair_ptr_t get_pair(status)
 It might be an idea to actually allocate a pair and return the pointer 
 to the head. This would simplify garbage collection.
  ******************************************************************************/
-node_ptr_t get_node(status)
+node_ptr_t get_node(int status)
 {
 #ifdef STATISTICS
 	Node_consumption += sizeof(struct node);
@@ -403,7 +396,7 @@ node_ptr_t get_node(status)
 			 get_clause();
  Allocate a clause.
  ******************************************************************************/
-clause_ptr_t get_clause(status)
+clause_ptr_t get_clause(int status)
 {
 clause_ptr_t result;
 #ifdef STATISTICS
@@ -444,8 +437,7 @@ pred_rec_ptr_t get_pred()
 /*******************************************************************************
 				alloc_err()
  ******************************************************************************/
-void alloc_err(s)
-char *s;
+void alloc_err(char *s)
 {
 	extern dyn_ptr_t Parent;
 	char msg[100];
@@ -461,8 +453,7 @@ char *s;
 /*******************************************************************************
 			fatal_alloc_err()
  ******************************************************************************/
-void fatal_alloc_err(s)
-char *s;
+void fatal_alloc_err(char *s)
 {
 	extern dyn_ptr_t Parent;
 	char msg[100];
@@ -478,8 +469,7 @@ This should be used to check the internal consistency of the interpreter.
 It doesnt make much sense on an IBM PC, because you can only meaningfully 
 compare pointers from the same segment.
  ******************************************************************************/
-int check_object(objptr)
-char *objptr;
+int check_object(char *objptr)
 {
 	if(((objptr >= HighHeap_ptr)||(objptr < Heap_mem))
 	    && ((objptr >= HighDyn_ptr)||(objptr < Dyn_mem))
@@ -522,10 +512,13 @@ void clean_temp()
 			clean_pred()
 Clean all temporary clauses from an atom.
 ***************************************************************************************************************************************/
-void clean_pred(atomptr)
-atom_ptr_t atomptr;
+void clean_pred(atom_ptr_t atomptr)
 {
 	clause_ptr_t previous, first, clauseptr;
+    first = NULL;
+    clauseptr = NULL;
+    previous = NULL;
+    
 #ifdef DEBUG
 	tty_pr_string(ATOMPTR_NAME (atomptr));
 	tty_pr_string(" cleaned \n");

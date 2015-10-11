@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 #include "prtypes.h"
-
+#include "prmachine.h"
 #define CRPLEASE "Press Return"
 
 extern char *Print_buffer;

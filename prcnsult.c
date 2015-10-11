@@ -2,8 +2,11 @@
 /* load a file of clauses */
 
 #include <stdio.h>
+#include <string.h>
 #include "prtypes.h"
 
+#include "prmachine.h"
+#include "prprint.h"
 
 #define CANTLOAD "Can't load %s"
 #define ERRBUILTIN "Can't redefine builtin %s"
@@ -27,9 +30,10 @@ static char Filename[80];
 /******************************************************************
 			make_clause()
  ******************************************************************/
-clause_ptr_t make_clause(clhead, clgoals, status, predptr)
-node_ptr_t clhead, clgoals;
-atom_ptr_t *predptr;
+//clause_ptr_t make_clause(clhead, clgoals, status, predptr)
+//node_ptr_t clhead, clgoals;
+//atom_ptr_t *predptr;
+clause_ptr_t make_clause(node_ptr_t clhead, node_ptr_t clgoals, int status,atom_ptr_t* predptr)
 {
 	clause_ptr_t clauseptr, get_clause();
 	ENTER("make_clause");
@@ -57,9 +61,7 @@ atom_ptr_t *predptr;
 			do_consult()
  ******************************************************************/
 
-do_consult(infilename,  status)
-char *infilename;
-int status;
+int do_consult(char *infilename,int status)
 {
 	extern node_ptr_t NilNodeptr;
 	extern FILE *Curr_outfile;
@@ -69,7 +71,7 @@ int status;
 	atom_ptr_t the_pred;
 	clause_ptr_t clauseptr;
 	node_ptr_t the_list, the_head, read_list();
-	char buffer[4096];
+//	char buffer[4096];
 
 	ENTER("do_consult");
 	Inp_linecount = 0;
@@ -126,8 +128,7 @@ int status;
  The usual function used to load a file.
  Called in prmain.c
  ******************************************************************************/
-load(s)
-char *s;
+int load(char *s)
 {
 ENTER("load");
 return(do_consult(s, PERMANENT));
@@ -137,9 +138,7 @@ return(do_consult(s, PERMANENT));
 		add_to_end()
 Adds a clause to the end of its packet.
 ********************************************************************/
-void add_to_end(clauseptr, pred)
-clause_ptr_t clauseptr;
-atom_ptr_t pred;
+void add_to_end(clause_ptr_t clauseptr,atom_ptr_t pred)
 {
 	clause_ptr_t clp, previous;
 
@@ -170,8 +169,7 @@ atom_ptr_t pred;
 Record the atom pointer as a predicate and verify we are not
 redefining a primitive.
 **********************************************************************/
-void record_pred(atomptr)
-atom_ptr_t atomptr;
+void record_pred(atom_ptr_t atomptr)
 {
 	extern unsigned int Inp_linecount;
 	pred_rec_ptr_t predptr, get_pred();

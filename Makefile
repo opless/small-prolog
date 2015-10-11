@@ -1,7 +1,7 @@
 TARGET  = sprolog
 LIBS = 
-#CC = gcc
-CFLAGS = 
+CC = gcc
+CFLAGS = -Wall
 
 .PHONY: default all clean
 

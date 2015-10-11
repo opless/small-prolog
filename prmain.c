@@ -38,6 +38,9 @@ COMPILERS:	Turbo C V1.5, Mark Williams Let's C V4,	Quick C
  */
 
 #include <stdio.h>
+#include "prmachine.h"
+#include "prcnsult.h"
+#include "prlush.h"
 
 #define CRPLEASE "Press Return"
 

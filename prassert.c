@@ -2,10 +2,14 @@
 /* implementation of assertz, asserta and clause handling
  */
 #include <stdio.h>
+#include <string.h>
+
 #include "prtypes.h"
 #include "prlex.h"
 #include "prunify.h"
 #include "prmachine.h"
+#include "prcnsult.h"
+#include "prassert.h"
 
 #define BADCOPYTYPE "Illegal data type in assert"
 #define NOTALIST "You did not give me a list"
@@ -34,10 +38,7 @@ void ini_copy()
 /**********************************************************************
 			copy_clause() 
  *********************************************************************/
-clause_ptr_t copy_clause(status, nodeptr, substptr, predptr)
-node_ptr_t nodeptr;/* represents the body of the clause */
-subst_ptr_t substptr;
-atom_ptr_t *predptr;
+clause_ptr_t copy_clause(int status,node_ptr_t nodeptr,subst_ptr_t substptr,atom_ptr_t* predptr)
 {
 	void copy_node();
 	clause_ptr_t clauseptr, make_clause();
@@ -98,9 +99,7 @@ atom_ptr_t *predptr;
 /*********************************************************************
 			copy_node()
  **********************************************************************/
-void copy_node(status, target, source, substptr)
-node_ptr_t source, target;
-subst_ptr_t substptr;
+void copy_node(int status,node_ptr_t target,node_ptr_t source, subst_ptr_t substptr)
 {
 	objtype_t type;
 	string_ptr_t stringptr, s, get_string();
@@ -188,9 +187,7 @@ subst_ptr_t substptr;
  			do_assertz()
  For the assertz builtin.
  *********************************************************************/
-do_assertz(status, nodeptr, substptr)
-node_ptr_t nodeptr;
-subst_ptr_t substptr;
+int do_assertz(int status, node_ptr_t nodeptr, subst_ptr_t substptr)
 {
 	clause_ptr_t clauseptr;
 	atom_ptr_t pred;
@@ -208,9 +205,7 @@ subst_ptr_t substptr;
  			do_asserta()
  For the asserta builtin.
  *********************************************************************/
-do_asserta(status, nodeptr, substptr)
-node_ptr_t nodeptr;
-subst_ptr_t substptr;
+int do_asserta(int status, node_ptr_t nodeptr, subst_ptr_t substptr)
 {
 	clause_ptr_t clauseptr;
 	atom_ptr_t pred;
@@ -231,10 +226,8 @@ subst_ptr_t substptr;
  asserts a clause at the nth position if it can
  n begins at 1.
  ******************************************************************************/
-do_assertn(status, nodeptr, substptr, n)
-node_ptr_t nodeptr;
-subst_ptr_t substptr;
-integer n;
+int do_assertn(int status, node_ptr_t nodeptr, subst_ptr_t substptr, integer n)
+
 {
 	clause_ptr_t clauseptr;
 	atom_ptr_t pred;
@@ -253,9 +246,7 @@ integer n;
 /******************************************************************************
 			remove_clause()
  ******************************************************************************/
-remove_clause(atomptr, clauseptr)
-atom_ptr_t atomptr;/* the predicate */
-clause_ptr_t clauseptr;/* remove this */
+int remove_clause(atom_ptr_t atomptr,/* the predicate */ clause_ptr_t clauseptr/* remove this */ )
 {
 	if (clauseptr == ATOMPTR_CLAUSE(atomptr))
 	{
@@ -287,10 +278,7 @@ clause_ptr_t clauseptr;/* remove this */
  Tries to add a clause in the nth position of its packet.
  Returns 0 iff unsuccessful.
  ******************************************************************************/
-add_as_nth(clauseptr, pred, n)
-clause_ptr_t clauseptr;
-atom_ptr_t pred;
-integer n;
+int add_as_nth(clause_ptr_t clauseptr,atom_ptr_t pred, integer n)
 {
 	clause_ptr_t clp;
 

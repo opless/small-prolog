@@ -39,6 +39,8 @@
 
 #include "prtypes.h"
 #include "prunify.h"
+#include "prmachine.h"
+#include "prprint.h"
 
 extern int Trace_flag;
 

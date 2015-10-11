@@ -51,7 +51,7 @@ varindx nvar;
 subst_ptr_t substptr;
 {
 	extern char *Var2Names[];
-	extern int Tracing_now;
+	//extern int Tracing_now;
 	varindx i;
 	char *molec;
 
@@ -126,7 +126,7 @@ int out_node(nodeptr, substptr)
 node_ptr_t nodeptr; /* this is the object to print */
 subst_ptr_t substptr;/* this gives you the variable values */
 {
-	extern long offset_subst();/* from pralloc.c */
+	//extern long offset_subst();/* from pralloc.c */
 	atom_ptr_t atomptr;
 	varindx offset;
 
@@ -142,8 +142,8 @@ subst_ptr_t substptr;/* this gives you the variable values */
 
 	case VAR:
 		offset = NODEPTR_OFFSET(nodeptr);
-		sprintf(Print_buffer, "_%lu_%ld", offset/sizeof(struct subst),
-		    offset_subst(substptr));
+		sprintf(Print_buffer, "_%lu_%ld", (long unsigned int)(offset/sizeof(struct subst)),
+		    (long int)offset_subst(substptr));
 		return(pr_string(Print_buffer));
 
 	case STRING:
@@ -261,7 +261,7 @@ int pr_node(node_ptr_t nodeptr)
 
 	case VAR:
 		offset = NODEPTR_OFFSET(nodeptr);
-		sprintf(Print_buffer, "_%lu", offset/sizeof(struct subst));
+		sprintf(Print_buffer, "_%lu", (long unsigned int)(offset/sizeof(struct subst)));
 		return(pr_string(Print_buffer));
 
 	case STRING:

@@ -12,7 +12,7 @@ node_ptr_t ** my_Trail_alloc();
 subst_ptr_t my_Subst_alloc( my_alloc_size_t how_much); /* in bytes */
 temp_ptr_t my_Temp_alloc( my_alloc_size_t how_much); /* in bytes */
 char *my_alloc( my_alloc_size_t how_much, int status);
-long offset_subst( subst_ptr_t substptr);
+integer offset_subst( subst_ptr_t substptr);
 string_ptr_t get_string(my_alloc_size_t how_much,int status);
 real_ptr_t get_real(int status);
 atom_ptr_t get_atom(int status);

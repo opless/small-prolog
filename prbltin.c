@@ -1529,7 +1529,6 @@ of the object.
  ************************************************************************/
 int Pstring_from()
 {
-        long offset_subst();
         node_ptr_t nodeptr;
 
         nodeptr = nth_arg(1);
@@ -1553,8 +1552,8 @@ int Pstring_from()
         case STRING:
                 return(bind_string(2, NODEPTR_STRING(nodeptr)));
         case VAR:
-                sprintf(Print_buffer, "_%lu_%ld", NODEPTR_OFFSET(nodeptr)/sizeof(struct subst),
-                    offset_subst(DerefSubst));
+                sprintf(Print_buffer, "_%lu_%ld", (long unsigned int)NODEPTR_OFFSET(nodeptr)/sizeof(struct subst),
+                    (long int)offset_subst(DerefSubst));
                 return(bind_string(2, Print_buffer));
         default:
                 return(0);

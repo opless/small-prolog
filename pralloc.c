@@ -317,7 +317,7 @@ char *my_alloc(my_alloc_size_t how_much,int status)
  between two far pointers 
  ******************************************************************************/
 
-long offset_subst(subst_ptr_t substptr)
+integer offset_subst(subst_ptr_t substptr)
 {
 	return((long)(substptr - (subst_ptr_t)Subst_mem));
 }
